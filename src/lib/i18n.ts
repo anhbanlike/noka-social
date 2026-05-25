@@ -29,6 +29,7 @@ export const i18nDict = {
     menu_passwords: 'Mật khẩu',
     menu_account: 'Tài khoản',
     menu_telegram: 'Telegram Bot',
+    menu_admin: 'Quản trị viên',
     menu_logout: 'Đăng xuất',
     language: 'Ngôn ngữ',
 
@@ -164,6 +165,7 @@ export const i18nDict = {
     menu_passwords: 'Passwords',
     menu_account: 'Account',
     menu_telegram: 'Telegram Bot',
+    menu_admin: 'Admin Panel',
     menu_logout: 'Logout',
     language: 'Language',
 
@@ -299,6 +301,7 @@ export const i18nDict = {
     menu_passwords: '密码金库',
     menu_account: '账户信息',
     menu_telegram: '电报机器人',
+    menu_admin: '管理后台',
     menu_logout: '登出系统',
     language: '语言设置',
 

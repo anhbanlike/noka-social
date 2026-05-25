@@ -13,7 +13,8 @@ import {
   ChevronRight,
   Menu,
   X,
-  Languages
+  Languages,
+  Settings
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -55,7 +56,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
       label: t.menu_telegram,
       path: '/telegram',
     },
+    {
+      icon: Settings,
+      label: t.menu_admin,
+      path: '/admin',
+      adminOnly: true,
+    },
   ];
+
+  const filteredMenuItems = menuItems.filter(item => !item.adminOnly || user?.email === 'ngockhanhsocial@gmail.com' || localStorage.getItem('noka_session')?.includes('ngockhanhsocial@gmail.com'));
 
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -77,7 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
   // Render Sidebar Items
   const renderNavLinks = () => (
     <nav className="flex-1 flex flex-col gap-1.5 px-3 py-6" id="sidebar-nav">
-      {menuItems.map((item) => {
+      {filteredMenuItems.map((item) => {
         const Icon = item.icon;
         const isActive = location.pathname === item.path;
 

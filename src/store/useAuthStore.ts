@@ -371,6 +371,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             errorMsgStr = 'Lỗi kết nối mạng! Vui lòng kiểm tra lại đường truyền internet.';
           } else if (authError.code === 'auth/too-many-requests') {
             errorMsgStr = 'Tài khoản tạm thời bị khóa do đăng nhập sai nhiều lần. Hãy thử lại sau ít phút!';
+          } else if (authError.code === 'auth/operation-not-allowed' || authError.message?.includes('operation-not-allowed')) {
+            errorMsgStr = 'Lỗi cấu hình (auth/operation-not-allowed): Tính năng Đăng nhập bằng Email/Password chưa được bật trong Firebase Console của dự án của bạn.';
           }
           
           return { error: errorMsgStr };

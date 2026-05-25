@@ -14,6 +14,8 @@ import Platforms from './pages/Platforms';
 import Passwords from './pages/Passwords';
 import Account from './pages/Account';
 import Telegram from './pages/Telegram';
+import Admin from './pages/Admin';
+import { AdminGuard } from './components/layout/AdminGuard';
 
 export const App: React.FC = () => {
   return (
@@ -47,6 +49,14 @@ export const App: React.FC = () => {
         <Route path="/passwords" element={<Passwords />} />
         <Route path="/account" element={<Account />} />
         <Route path="/telegram" element={<Telegram />} />
+        <Route 
+          path="/admin" 
+          element={
+            <AdminGuard>
+              <Admin />
+            </AdminGuard>
+          } 
+        />
 
         {/* Default catch-all pathway redirects */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

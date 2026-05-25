@@ -6,6 +6,7 @@ import { Button, Input } from '../components/ui';
 import { ShieldCheck, Eye, EyeOff, Sparkles, AlertCircle, Loader2, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
+import firebaseConfig from '../../firebase-applet-config.json';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -18,6 +19,119 @@ export const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const handleOfflineBypass = async () => {
+    setErrorMsg(null);
+    setLoading(true);
+    setLoadingStep('💾 Đang khởi tạo cơ sở dữ liệu giả lập cục bộ...');
+    
+    // Check if we already have some user, if not create a default one
+    const users = JSON.parse(localStorage.getItem('noka_users') || '[]');
+    let targetUser = users[0];
+    
+    if (users.length === 0) {
+      // Create a default offline developer/test account
+      const userId = 'usr_offline_dev';
+      const refCode = 'NK-OFFLINE';
+      const realEmail = 'demo@noka-offline.local';
+      
+      const newUser = {
+        id: userId,
+        username: identifier.trim() || 'demo',
+        email: realEmail,
+        full_name: 'Noka Guest',
+        phone: '0987654321',
+        password: password || '12345678',
+        referral_code: refCode,
+        created_at: new Date().toISOString(),
+      };
+      
+      users.push(newUser);
+      localStorage.setItem('noka_users', JSON.stringify(users));
+      
+      const profile = {
+        id: userId,
+        username: identifier.trim() || 'demo',
+        full_name: 'Noka Guest',
+        phone: '0987654321',
+        avatar_url: null,
+        referral_code: refCode,
+        created_at: new Date().toISOString(),
+      };
+      
+      const profiles = JSON.parse(localStorage.getItem('noka_profiles') || '[]');
+      profiles.push(profile);
+      localStorage.setItem('noka_profiles', JSON.stringify(profiles));
+      
+      targetUser = newUser;
+    } else {
+      // Find matching user or just pick the first one, or register entered credentials
+      const matched = users.find((u: any) => 
+        u.username.toLowerCase() === identifier.toLowerCase().trim() || 
+        (u.email && u.email.toLowerCase() === identifier.toLowerCase().trim())
+      );
+      if (matched) {
+        targetUser = matched;
+      } else {
+        // Automatically create a local offline account with entered credentials to avoid friction!
+        const userId = `usr_offline_${Math.random().toString(36).substring(2, 10)}`;
+        const refCode = `NK-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+        const realEmail = identifier.includes('@') ? identifier.trim() : `${identifier.toLowerCase().trim()}@noka-offline.local`;
+        
+        const newUser = {
+          id: userId,
+          username: identifier.trim(),
+          email: realEmail,
+          full_name: identifier.trim(),
+          phone: '0987654321',
+          password: password || '12345678',
+          referral_code: refCode,
+          created_at: new Date().toISOString(),
+        };
+        
+        users.push(newUser);
+        localStorage.setItem('noka_users', JSON.stringify(users));
+        
+        const profile = {
+          id: userId,
+          username: identifier.trim(),
+          full_name: identifier.trim(),
+          phone: '0987654321',
+          avatar_url: null,
+          referral_code: refCode,
+          created_at: new Date().toISOString(),
+        };
+        
+        const profiles = JSON.parse(localStorage.getItem('noka_profiles') || '[]');
+        profiles.push(profile);
+        localStorage.setItem('noka_profiles', JSON.stringify(profiles));
+        
+        targetUser = newUser;
+      }
+    }
+    
+    // Log the user in offline
+    localStorage.setItem('noka_session', JSON.stringify({ userId: targetUser.id, email: targetUser.email }));
+    
+    // Update store state
+    const profile = {
+      id: targetUser.id,
+      username: targetUser.username,
+      full_name: targetUser.full_name,
+      phone: targetUser.phone,
+      avatar_url: targetUser.avatar_url || null,
+      referral_code: targetUser.referral_code,
+      created_at: targetUser.created_at,
+    };
+    
+    useAuthStore.setState({ user: profile, sessionEmail: targetUser.email, loading: false });
+    
+    setLoadingStep('✅ Khởi tạo giả lập ngoại tuyến hoàn tất!');
+    toast.success(`Đăng nhập chế độ giả lập ngoại tuyến thành công! Xin chào, ${targetUser.full_name}.`);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    setLoading(false);
+    navigate('/dashboard');
+  };
 
   // Initialize and verify redirects
   useEffect(() => {
@@ -115,18 +229,57 @@ export const Login: React.FC = () => {
         {/* Dynamic visual alert notification panels */}
         <AnimatePresence mode="wait">
           {errorMsg && (
-            <motion.div
-              initial={{ opacity: 0, height: 0, y: -10 }}
-              animate={{ opacity: 1, height: 'auto', y: 0 }}
-              exit={{ opacity: 0, height: 0, y: -10 }}
-              className="mb-5 bg-red-500/10 border border-red-500/35 p-3.5 rounded-xl flex items-start gap-2.5 text-xs text-red-400 overflow-hidden"
-            >
-              <AlertCircle size={16} className="shrink-0 mt-0.5 animate-bounce" />
-              <div className="flex flex-col gap-0.5">
-                <span className="font-extrabold text-red-300">Lỗi xác thực</span>
-                <span className="font-sans text-slate-300 leading-relaxed">{errorMsg}</span>
-              </div>
-            </motion.div>
+            <div className="flex flex-col gap-3 mb-5">
+              <motion.div
+                initial={{ opacity: 0, height: 0, y: -10 }}
+                animate={{ opacity: 1, height: 'auto', y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -10 }}
+                className="bg-red-500/10 border border-red-500/35 p-3.5 rounded-xl flex items-start gap-2.5 text-xs text-red-400 overflow-hidden"
+              >
+                <AlertCircle size={16} className="shrink-0 mt-0.5 animate-bounce" />
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-extrabold text-red-300">Lỗi xác thực</span>
+                  <span className="font-sans text-slate-300 leading-relaxed">{errorMsg}</span>
+                </div>
+              </motion.div>
+
+              {(errorMsg.includes('auth/operation-not-allowed') || errorMsg.includes('operation-not-allowed')) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-4 bg-slate-950/80 border border-blue-500/30 rounded-xl flex flex-col gap-3 text-xs text-slate-300"
+                >
+                  <div className="flex items-center gap-2 text-blue-400 font-extrabold uppercase tracking-wider text-[11px]">
+                    <Sparkles size={14} className="animate-pulse shrink-0" />
+                    <span>Hướng dẫn cấu hình Firebase Auth</span>
+                  </div>
+                  <p className="text-slate-400 leading-relaxed font-sans">
+                    Dự án Firebase của bạn chưa kích hoạt phương thức đăng nhập bằng <strong>Email/Password</strong>. Hãy thực hiện các bước sau để cấu hình:
+                  </p>
+                  <ol className="list-decimal pl-4 flex flex-col gap-1 text-slate-400 font-sans">
+                    <li>Truy cập <a href="https://console.firebase.google.com" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline font-extrabold">Firebase Console</a></li>
+                    <li>Tìm và chọn dự án: <strong>{firebaseConfig.projectId}</strong></li>
+                    <li>Đi tới <strong>Build</strong> &gt; <strong>Authentication</strong> &gt; tab <strong>Sign-in method</strong></li>
+                    <li>Chọn <strong>Email/Password</strong>, nhấp <strong>Enable (Kích hoạt)</strong> và nhấn <strong>Save (Lưu)</strong>.</li>
+                  </ol>
+                  <div className="h-px bg-white/5 my-1" />
+                  <p className="text-slate-400 leading-relaxed font-sans">
+                    Hoặc dùng thử ứng dụng ngay với chế độ <strong>Giả lập Ngoại tuyến (Offline Emulator)</strong> bảo mật cục bộ:
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full bg-blue-600/10 hover:bg-blue-600/25 border-blue-500/40 text-blue-300 font-bold flex items-center justify-center gap-2 py-2"
+                    id="login-offline-bypass-btn"
+                    onClick={handleOfflineBypass}
+                  >
+                    <ShieldCheck size={14} />
+                    <span>Kích Hoạt & Đăng Nhập Ngoại Tuyến</span>
+                  </Button>
+                </motion.div>
+              )}
+            </div>
           )}
 
           {loading && (
