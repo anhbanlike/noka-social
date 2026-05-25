@@ -1,0 +1,83 @@
+{
+  "entities": {
+    "Profile": {
+      "title": "Profile",
+      "description": "User account profile details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "username": { "type": "string" },
+        "full_name": { "type": "string" },
+        "phone": { "type": "string" },
+        "avatar_url": { "type": "string" },
+        "referral_code": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["id", "username", "full_name"]
+    },
+    "Platform": {
+      "title": "Platform",
+      "description": "Linked social platforms (such as Facebook, Gmail, TikTok)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "user_id": { "type": "string" },
+        "name": { "type": "string" },
+        "logo_url": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["id", "user_id", "name"]
+    },
+    "Password": {
+      "title": "Password",
+      "description": "Multi-level encrypted credentials and notes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "user_id": { "type": "string" },
+        "platform_id": { "type": "string" },
+        "account_name": { "type": "string" },
+        "password_levels": { "type": "string" },
+        "notes": { "type": "string" },
+        "created_at": { "type": "string" },
+        "updated_at": { "type": "string" }
+      },
+      "required": ["id", "user_id", "account_name", "password_levels"]
+    },
+    "TelegramConfig": {
+      "title": "TelegramConfig",
+      "description": "User specialized Telegram alarm and notification configuration",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "user_id": { "type": "string" },
+        "bot_token": { "type": "string" },
+        "chat_id": { "type": "string" },
+        "is_active": { "type": "boolean" },
+        "notify_new_password": { "type": "boolean" },
+        "notify_suspicious_login": { "type": "boolean" },
+        "notify_system_update": { "type": "boolean" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["id", "user_id"]
+    }
+  },
+  "firestore": {
+    "profiles/{userId}": {
+      "schema": "Profile",
+      "description": "User profile records referenced by auth uid"
+    },
+    "platforms/{platformId}": {
+      "schema": "Platform",
+      "description": "Social/Business platforms created by users"
+    },
+    "passwords/{passwordId}": {
+      "schema": "Password",
+      "description": "Vault credentials created by users"
+    },
+    "telegram_configs/{configId}": {
+      "schema": "TelegramConfig",
+      "description": "Telegram alerting configurations mapped per user"
+    }
+  }
+}

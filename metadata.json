@@ -1,0 +1,6 @@
+{
+  "name": "Noka Social",
+  "description": "Noka Social — Password Manager SaaS App Việt Nam with luxury dark theme, multi-level access levels, and secure client-side AES-256 encryption.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
